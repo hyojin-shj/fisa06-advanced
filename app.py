@@ -85,11 +85,11 @@ if confirm_btn:
             else:
                 st.subheader(f"[{company_name}]")
 
-                chart_type = st.sidebar.radio(
-                "차트 타입",
-                ["Plotly (캔들)", "Matplotlib (종가)"],
-                index=0
-            )
+            #     chart_type = st.sidebar.radio(
+            #     "차트 타입",
+            #     ["Plotly (캔들)", "Matplotlib (종가)"],
+            #     index=0
+            # )
 
                 # st.dataframe(price_df.tail(10), width="stretch")
 
