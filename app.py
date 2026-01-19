@@ -11,9 +11,9 @@ import FinanceDataReader as fdr
 import matplotlib.pyplot as plt
 import koreanize_matplotlib
 import os
-import load_env
+from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv() 
 my_name = os.getenv("MY_NAME")
 st.header(my_name)
 
