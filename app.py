@@ -19,6 +19,9 @@ load_dotenv()
 my_name = os.getenv("MY_NAME")
 st.header(my_name)
 
+#서버에 저장하는 결과값 => 캐싱
+
+@st.cache_data
 def get_krx_company_list() -> pd.DataFrame:
     try:
         # 파이썬 및 인터넷의 기본 문자열 인코딩 방식- UTF-8
@@ -58,6 +61,8 @@ selected_dates = st.sidebar.date_input(
     format="MM.DD.YYYY",
 )
 
+
+
 # st.write(selected_dates)
 
 confirm_btn = st.sidebar.button('조회하기') # 클릭하면 True
@@ -78,14 +83,22 @@ if confirm_btn:
             if price_df.empty:
                 st.info("해당 기간의 주가 데이터가 없습니다.")
             else:
-                st.subheader(f"[{company_name}] 주가 데이터")
-                st.dataframe(price_df.tail(10), width="stretch")
+                st.subheader(f"[{company_name}]")
+
+                chart_type = st.sidebar.radio(
+                "차트 타입",
+                ["Plotly (캔들)", "Matplotlib (종가)"],
+                index=0
+            )
+
+                # st.dataframe(price_df.tail(10), width="stretch")
 
                 # # Matplotlib 시각화
-                # fig, ax = plt.subplots(figsize=(12, 5))
-                # price_df['Close'].plot(ax=ax, grid=True, color='red')
-                # ax.set_title(f"{company_name} 종가 추이", fontsize=15)
-                # st.pyplot(fig)
+                # if chart_type =="Plotly (캔들)":
+                #     fig, ax = plt.subplots(figsize=(12, 5))
+                #     price_df['Close'].plot(ax=ax, grid=True, color='red')
+                #     ax.set_title(f"{company_name} 종가 추이", fontsize=15)
+                #     st.pyplot(fig)
 
                 #plotly 시각화
                 fig = go.Figure(data=[go.Candlestick(x=price_df.index,
@@ -99,7 +112,51 @@ if confirm_btn:
                         yaxis_title="Price",
                         xaxis_rangeslider_visible=False
                 )
+
+                # 검색 기간내 최고가, 최저가 출력
+                low_price = price_df['Low'].min()
+                high_price = price_df['High'].max()
+                low_date = price_df['Low'].idxmin()
+                high_date = price_df['High'].idxmax()
+
+                fig.add_annotation(
+                x=low_date, y=low_price,
+                text=f"최저가<br>{low_price:,}",
+                showarrow=True, arrowhead=2,
+                arrowcolor="blue",
+                font=dict(color="blue"),
+                ay=40
+            )
+                
+                fig.add_annotation(
+                x=high_date, y=high_price,
+                text=f"최고가<br>{high_price:,}",
+                showarrow=True, arrowhead=2,
+                arrowcolor="red",
+                font=dict(color="red"),
+                ay=-40
+            )
+                
+                c1, c2 = st.columns(2)
+
+                c1.metric("최저가", f"{low_price:,}")
+                c2.metric("최고가", f"{high_price:,}")
+
                 st.plotly_chart(fig, use_container_width=True)
+
+                # 과거추이, 미래추이 알려주기
+
+                LOOKBACK_DAYS = 60
+                rets = price_df["Close"].pct_change().dropna().tail(LOOKBACK_DAYS)
+
+                up_prob = (rets > 0).mean() * 100
+                down_prob = 100 - up_prob
+
+                c1, c2 = st.columns(2)
+                c1.metric("오를까?👍", f"{up_prob:.1f}%")
+                c2.metric("내릴까?👎️", f"{down_prob:.1f}%")
+
+
 
                 # 엑셀 다운로드 기능
                 output = BytesIO()
