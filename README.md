@@ -1,7 +1,7 @@
 # 📈StockFlow(주가 조회 & 분석)
 
 > "주식 초보자를 위한 핵심 지표와 데이터를 직관적으로 정리한 쉬운 주식 분석 대시보드"
-
+[![Video Label](https://youtu.be/DRanEaQ13ZA?si=GGWEkvlSGxZHIGRQ)
 
 
 <br>
